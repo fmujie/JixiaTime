@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Models\Jx;
+
+use Illuminate\Database\Eloquent\Model;
+
+class SignRecord extends Model
+{
+    protected $table = 'signrecord';
+    protected $guarded = ['id'];
+}
