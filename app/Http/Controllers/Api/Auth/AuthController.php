@@ -11,6 +11,16 @@ use App\Http\Controllers\Auth\RegisterController;
 
 class AuthController extends Controller
 {
+    // 预定义response数组、状态码(格式设定)
+    protected $statusCode = 200;
+    protected $returned = [
+        'result' => [
+            'code' => 0,
+            'status' => 'error',
+            'msg' => null
+        ],
+        'data' => null
+    ];
     /**
      * Create a new AuthController instance.
      *
@@ -32,34 +42,50 @@ class AuthController extends Controller
         $credentials = request(['name', 'password']);
  
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Incorrect name or password'], 401);
+            $this->returned['result']['msg'] = 'Incorrect name or password';
+            $this->statusCode = 401;
+            // return response()->json(['error' => 'Incorrect name or password'], 401);
+        } else {
+            $this->returned['result']['code'] = 1;
+            $this->returned['result']['status'] = 'success';
+            $this->returned['result']['msg'] = '获取token成功';
+            $ret = $this->returnWithToken($token);
+            $this->returned['data'] = $ret;
         }
  
-        return $this->respondWithToken($token);
+        return response()->json($this->returned, $this->statusCode);
      }
 
      public function register(Request $request)
      {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
             'company' => ['required', 'string']
 
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-        // dd($request->all());
-        $res = User::create($request->all());
-        if ($res) {
-            return response()->json($res, 200);
+            $retErr = $validator->errors();
+            $errMsgs = [];
+            foreach ($retErr->all() as $message) {
+                array_push($errMsgs, $message);
+            }
+            $this->returned['result']['msg'] = $errMsgs;
+            $this->statusCode = 400;
         } else {
-            return response()->json('注册失败，请重试', 200);
+            $res = User::create($request->all());
+            if ($res) {
+                $this->returned['result']['code'] = 1;
+                $this->returned['result']['status'] = 'success';
+                $this->returned['result']['msg'] = '注册成功';
+                $this->returned['data'] = $res;
+            } else {
+                $this->returned['result']['msg'] = '注册失败，请重试';
+            }
         }
-        // $data = [];
-        // $data = $data.append($request->all());
-        // $RegisterController->create($data);
+
+        return response()->json($this->returned, $this->statusCode);
      }
  
      /**
@@ -101,12 +127,12 @@ class AuthController extends Controller
       *
       * @return \Illuminate\Http\JsonResponse
       */
-     protected function respondWithToken($token)
+     protected function returnWithToken($token)
      {
-         return response()->json([
+         return [
              'access_token' => $token,
              'token_type' => 'bearer',
              'expires_in' => auth()->factory()->getTTL()
-         ]);
+         ];
      }
 }
