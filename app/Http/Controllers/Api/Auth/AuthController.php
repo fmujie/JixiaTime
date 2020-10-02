@@ -129,7 +129,6 @@ class AuthController extends Controller
      protected function returnWithToken($token)
      {
          return [
-             'user_id' => Auth::user()->id,
              'access_token' => $token,
              'token_type' => 'bearer',
              'expires_in' => auth()->factory()->getTTL()

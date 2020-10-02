@@ -5,20 +5,32 @@ namespace App\Http\Controllers\Api\JxSg;
 use App\User;
 use Illuminate\Http\Request;
 use App\Models\Jx\SignRecord;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class RecordController extends Controller
 {
 
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+     public function __construct()
+     {
+        parent::__construct();
+        $this->middleware('auth:api');
+     }
+     
     public function record(Request $request)
     {
         $rules = [
-            'user_id' => ['required', 'int'],
             'star' => ['required', 'string'],
             'money' => ['required'],
             'grade' => ['required', 'string'],
         ];
+        request()->offsetSet('user_id', Auth::user()->id);
         $validator = Validator::make($request->all(), $rules);
         $this->unio($request, $validator, '打卡成功', '打卡失败, 请稍后重试');
 
@@ -65,6 +77,7 @@ class RecordController extends Controller
 
     private function unio($request, $validator, $sucMsg, $errMsg, $judge = false)
     {
+        $sel = false;
         if ($validator->fails()) {
             $retErr = $validator->errors();
             $errMsgs = [];
@@ -80,8 +93,15 @@ class RecordController extends Controller
                 $data = SignRecord::find($request->id);
                 if (is_null($data)) {
                     $res = false;
+                } else {
+                    if ($data->user_id != Auth::user()->id) {
+                        $this->returned['result']['msg'] = '非本人更改';
+                        $res = false;
+                        $sel = true;
+                    } else {
+                        $res = $data->update($request->all());
+                    }
                 }
-                $res = $data->update($request->all());
             }
             
             if ($res) {
@@ -90,7 +110,11 @@ class RecordController extends Controller
                 $this->returned['result']['msg'] = "$sucMsg";
                 $this->returned['data'] = $res;
             } else {
-                $this->returned['result']['msg'] = "$errMsg";
+                if (!$sel) {
+                    $this->returned['result']['msg'] = "$errMsg";
+                } else {
+                    $this->returned['result']['msg'] = "$errMsg" . ', 非本人更改。';
+                }
             }
         }
     }

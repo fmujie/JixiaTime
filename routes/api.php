@@ -31,7 +31,7 @@ $api->version('v1', [
         $api->post('me', 'Auth\AuthController@me');
     });
     // $api->get('ceshi', 'Auth\AuthController@ceshi')->middleware('role:Administer');
-    $api->group(['middleware' => 'api'], function ($api) {
+    $api->group(['middleware' => ['api', 'auth']], function ($api) {
         $api->post('/sigrec', 'JxSg\RecordController@record');
         $api->patch('/uprec', 'JxSg\RecordController@updateRec');
         $api->get('/statistic/{id}/{begin}/{end}', 'JxSg\RecordController@statistics')->middleware('role:Administer');
