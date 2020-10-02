@@ -25,15 +25,17 @@ $api->version('v1', [
 ], function ($api) {
     $api->group(['middleware' => 'api', 'prefix' => 'auth'], function ($api) {
         $api->post('register', 'Auth\AuthController@register');
-        $api->post('login', 'Auth\AuthController@login');
+        $api->post('login', 'Auth\AuthController@login')->name('login');
         $api->post('logout', 'Auth\AuthController@logout');
         $api->post('refresh', 'Auth\AuthController@refresh');
         $api->post('me', 'Auth\AuthController@me');
     });
     // $api->get('ceshi', 'Auth\AuthController@ceshi')->middleware('role:Administer');
-    $api->post('/sigrec', 'JxSg\RecordController@record');
-    $api->patch('/uprec', 'JxSg\RecordController@updateRec');
-    $api->get('/statistic/{id}/{begin}/{end}', 'JxSg\RecordController@statistics');
+    $api->group(['middleware' => 'api'], function ($api) {
+        $api->post('/sigrec', 'JxSg\RecordController@record');
+        $api->patch('/uprec', 'JxSg\RecordController@updateRec');
+        $api->get('/statistic/{id}/{begin}/{end}', 'JxSg\RecordController@statistics')->middleware('role:Administer');
+    });
     $api->get('/test', 'TestController@test');
 });
 
