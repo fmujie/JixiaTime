@@ -15,10 +15,10 @@ class CreateSignrecordTable extends Migration
     {
         Schema::create('signrecord', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id')->nullable();
+            $table->integer('user_id');
             $table->string('star')->default('2.5');
-            $table->string('money')->default('0');
-            $table->string('grad')->nullable();
+            $table->float('money')->default(0);
+            $table->string('grade');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

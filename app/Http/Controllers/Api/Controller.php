@@ -11,6 +11,17 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    // 预定义response数组、状态码(格式设定)
+    protected $statusCode = 200;
+    protected $returned = [
+        'result' => [
+            'code' => 0,
+            'status' => 'error',
+            'msg' => null
+        ],
+        'data' => null
+    ];
+
     public function __construct()
     {
         auth()->setDefaultDriver('api');

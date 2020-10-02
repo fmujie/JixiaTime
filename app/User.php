@@ -31,6 +31,14 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
+     * 
+     */
+     public function sinRec()
+     {
+        return $this->hasMany('App\Models\Jx\SignRecord', 'user_id', 'id');
+     }
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array

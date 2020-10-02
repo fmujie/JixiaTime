@@ -44,7 +44,6 @@ class AuthController extends Controller
         if (! $token = auth()->attempt($credentials)) {
             $this->returned['result']['msg'] = 'Incorrect name or password';
             $this->statusCode = 401;
-            // return response()->json(['error' => 'Incorrect name or password'], 401);
         } else {
             $this->returned['result']['code'] = 1;
             $this->returned['result']['status'] = 'success';
@@ -130,6 +129,7 @@ class AuthController extends Controller
      protected function returnWithToken($token)
      {
          return [
+             'user_id' => Auth::user()->id,
              'access_token' => $token,
              'token_type' => 'bearer',
              'expires_in' => auth()->factory()->getTTL()

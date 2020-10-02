@@ -30,7 +30,10 @@ $api->version('v1', [
         $api->post('refresh', 'Auth\AuthController@refresh');
         $api->post('me', 'Auth\AuthController@me');
     });
-    $api->get('ceshi', 'Auth\AuthController@ceshi')->middleware('role:Administer');
+    // $api->get('ceshi', 'Auth\AuthController@ceshi')->middleware('role:Administer');
+    $api->post('/sigrec', 'JxSg\RecordController@record');
+    $api->patch('/uprec', 'JxSg\RecordController@updateRec');
+    $api->get('/statistic/{id}/{begin}/{end}', 'JxSg\RecordController@statistics');
     $api->get('/test', 'TestController@test');
 });
 
