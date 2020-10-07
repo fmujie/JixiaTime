@@ -27,6 +27,13 @@ class RecordController extends Controller
      {
         $usersData = User::get();
         $returnedList =$this->synArr($usersData);
+        // 排序（SORT_DESC=>降序、SORT_ASC=>升序）
+        $newArr = [];
+        foreach ($returnedList as $key => $value) {
+            $newArr[$key]['user_money'] = $value['user_money'];
+        }
+        array_multisort($newArr, SORT_DESC, $returnedList);
+
         if (empty($returnedList)) {
             $this->returned['result']['msg'] = '未查询到任何数据';
         } else {
