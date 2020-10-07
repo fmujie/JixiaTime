@@ -23,6 +23,22 @@ class RecordController extends Controller
         $this->middleware('auth:api');
      }
      
+     public function userList()
+     {
+        $usersData = User::get();
+        $returnedList =$this->synArr($usersData);
+        if (empty($returnedList)) {
+            $this->returned['result']['msg'] = '未查询到任何数据';
+        } else {
+            $this->returned['result']['msg'] = '查询成功';
+        }
+        $this->returned['result']['code'] = 1;
+        $this->returned['result']['status'] = 'success';
+        $this->returned['data'] = $returnedList;
+
+        return response()->json($this->returned, $this->statusCode);
+     }
+
     public function record(Request $request)
     {
         $rules = [
@@ -134,4 +150,25 @@ class RecordController extends Controller
         }
         return $dataArr;
     }
+
+    private function synArr($usersData)
+    {
+        $dataArr = [];
+        foreach ($usersData as $key => $value) {
+            $userId = $value->id;
+            $userName = $value->name;
+            $sinrecData = $value->sinRec;
+            $userMoney = 0;
+            foreach ($sinrecData as $k => $v) {
+                $userMoney += $v->money;
+            }
+            array_push($dataArr, [
+                'user_id' => $userId,
+                'user_name' => $userName,
+                'user_money' => $userMoney,
+            ]);
+         }
+         return $dataArr;
+    }
+
 }

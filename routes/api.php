@@ -35,6 +35,7 @@ $api->version('v1', [
         $api->post('/sigrec', 'JxSg\RecordController@record');
         $api->patch('/uprec', 'JxSg\RecordController@updateRec');
         $api->get('/statistic/{id}/{begin}/{end}', 'JxSg\RecordController@statistics')->middleware('role:Administer');
+        $api->get('/admin/userlist', 'JxSg\RecordController@userList')->middleware('role:Administer');
     });
     $api->get('/test', 'TestController@test');
 });
