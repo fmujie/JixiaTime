@@ -36,6 +36,7 @@ $api->version('v1', [
         $api->patch('/uprec', 'JxSg\RecordController@updateRec');
         $api->get('/statistic', 'JxSg\RecordController@statistics')->middleware('role:Administer');
         $api->get('/admin/userlist', 'JxSg\RecordController@userList')->middleware('role:Administer');
+        $api->delete('/admin/user/delete/{id}', 'JxSg\RecordController@delete')->middleware('role:Administer');
     });
     $api->get('/test', 'TestController@test');
 });
