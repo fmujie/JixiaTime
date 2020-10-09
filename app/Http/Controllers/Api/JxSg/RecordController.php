@@ -46,6 +46,22 @@ class RecordController extends Controller
         return response()->json($this->returned, $this->statusCode);
      }
 
+    public function delete(Request $request, $id)
+    {
+        $currentUser = User::find($id);
+        if (is_null($currentUser)) {
+            $this->returned['result']['msg'] = 'Record not found!';
+            $this->status = 404;
+        } else {
+            $currentUser->delete();
+            $this->returned['result']['code'] = 200;
+            $this->returned['result']['status'] = 'success';
+            $this->returned['result']['msg'] = 'User deleted successfully!';
+        }
+
+        return response()->json($this->returned, $this->statusCode);
+    }
+
     public function record(Request $request)
     {
         $rules = [
@@ -76,17 +92,17 @@ class RecordController extends Controller
     public function statistics(Request $request)
     {
         $rules = [
-            'id' => ['required'],
-            'begin' => ['required'],
-            'end' => ['required']
+            'userid' => ['required'],
+            'stime' => ['required'],
+            'etime' => ['required']
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             $this->returned['result']['msg'] = '参数错误';
         } else {
-            $id = $request->id;
-            $begin = $request->begin;
-            $end = $request->end;
+            $id = $request->userid;
+            $begin = $request->stime;
+            $end = $request->etime;
             if (is_null([$id, $begin, $end])) {
                 $this->returned['result']['msg'] = '请指定用户与闭合时间段';
             } else {
