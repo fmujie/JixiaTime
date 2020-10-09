@@ -99,7 +99,13 @@ class RecordController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            $this->returned['result']['msg'] = '参数错误';
+            $retErr = $validator->errors();
+            $errMsgs = [];
+            foreach ($retErr->all() as $message) {
+                array_push($errMsgs, $message);
+            }
+            $this->returned['result']['msg'] = $errMsgs;
+            $this->statusCode = 400;
         } else {
             $id = $request->userid;
             $begin = $request->stime;
