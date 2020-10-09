@@ -72,25 +72,39 @@ class RecordController extends Controller
         return response()->json($this->returned, $this->statusCode);
     }
 
-    public function statistics($id = null, $begin = null, $end = null)
+    // /{id}/{begin}/{end}  /1/2020-10-02/2020-10-03
+    public function statistics(Request $request)
     {
-        if (is_null([$id, $begin, $end])) {
-            $this->returned['result']['msg'] = '请指定用户与闭合时间段';
+        $rules = [
+            'id' => ['required'],
+            'begin' => ['required'],
+            'end' => ['required']
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $this->returned['result']['msg'] = '参数错误';
         } else {
-            $currentUser = User::find($id);
-            if (is_null($currentUser)) {
-                $this->returned['result']['msg'] = '未查询到该用户, 请检查参数';
+            $id = $request->id;
+            $begin = $request->begin;
+            $end = $request->end;
+            if (is_null([$id, $begin, $end])) {
+                $this->returned['result']['msg'] = '请指定用户与闭合时间段';
             } else {
-                $data = $currentUser->sinRec()
-                                    ->whereBetween('created_at', [$begin, $end])
-                                    ->get();
-                if ($data->isEmpty()) {
-                    $this->returned['result']['msg'] = '未查询到该用户此时间段的任何数据';
+                $currentUser = User::find($id);
+                if (is_null($currentUser)) {
+                    $this->returned['result']['msg'] = '未查询到该用户, 请检查参数';
                 } else {
-                    $this->returned['result']['msg'] = '查询成功';
-                    $this->returned['result']['code'] = 1;
-                    $this->returned['result']['status'] = 'success';
-                    $this->returned['data'] = self::syntheticArr($data);
+                    $data = $currentUser->sinRec()
+                                        ->whereBetween('created_at', [$begin, $end])
+                                        ->get();
+                    if ($data->isEmpty()) {
+                        $this->returned['result']['msg'] = '未查询到该用户此时间段的任何数据';
+                    } else {
+                        $this->returned['result']['msg'] = '查询成功';
+                        $this->returned['result']['code'] = 1;
+                        $this->returned['result']['status'] = 'success';
+                        $this->returned['data'] = self::syntheticArr($data);
+                    }
                 }
             }
         }
