@@ -54,6 +54,7 @@ class RecordController extends Controller
             $this->status = 404;
         } else {
             $currentUser->delete();
+            $currentUser->sinRec()->delete();
             $this->returned['result']['code'] = 200;
             $this->returned['result']['status'] = 'success';
             $this->returned['result']['msg'] = 'User deleted successfully!';
