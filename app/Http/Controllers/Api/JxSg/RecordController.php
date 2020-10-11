@@ -148,6 +148,7 @@ class RecordController extends Controller
     private function unio($request, $validator, $sucMsg, $errMsg, $judge = false)
     {
         $sel = false;
+        $retMeJd = false;
         if ($validator->fails()) {
             $retErr = $validator->errors();
             $errMsgs = [];
@@ -158,7 +159,16 @@ class RecordController extends Controller
             $this->statusCode = 400;
         } else {
             if (!$judge) {
-                $res = SignRecord::create($request->all());
+                $lastTime = SignRecord::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->get()[0]->created_at->toDateTimeString();
+                $interval = (new Carbon)->diffInHours($lastTime, true);
+                if ($interval > 3)
+                {
+                    $res = SignRecord::create($request->all());
+                } else {
+                    $this->returned['result']['msg'] = '三小时内只能打卡一次';
+                    $res = false;
+                    $retMeJd = true;
+                } 
             } else {
                 $data = SignRecord::find($request->id);
                 if (is_null($data)) {
@@ -180,10 +190,12 @@ class RecordController extends Controller
                 $this->returned['result']['msg'] = "$sucMsg";
                 $this->returned['data'] = $res;
             } else {
-                if (!$sel) {
-                    $this->returned['result']['msg'] = "$errMsg";
-                } else {
-                    $this->returned['result']['msg'] = "$errMsg" . ', 非本人更改。';
+                if (!$retMeJd) {
+                    if (!$sel) {
+                        $this->returned['result']['msg'] = "$errMsg";
+                    } else {
+                        $this->returned['result']['msg'] = "$errMsg" . ', 非本人更改。';
+                    }
                 }
             }
         }
