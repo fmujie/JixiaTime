@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\JxSg;
 
 use App\User;
+use App\Models\Jx\Star;
 use Illuminate\Http\Request;
 use App\Models\Jx\SignRecord;
 use Illuminate\Support\Facades\Auth;
@@ -67,9 +68,10 @@ class RecordController extends Controller
     {
         $rules = [
             'star' => ['required', 'string'],
-            'money' => ['required'],
+            // 'money' => ['required'],
             'grade' => ['required', 'string'],
         ];
+        request()->offsetSet('money', Star::where('star', $request->get('star'))->first()->money);
         request()->offsetSet('user_id', Auth::user()->id);
         $validator = Validator::make($request->all(), $rules);
         $this->unio($request, $validator, '打卡成功', '打卡失败, 请稍后重试');
@@ -183,13 +185,15 @@ class RecordController extends Controller
     {
         $dataArr = [];
         foreach ($data as $key => $value) {
+            $crtdt = $value->created_at->toDateTimeString();
+            $udtdt = $value->updated_at->toDateTimeString();
             array_push($dataArr, [
                 'star' => $value->star,
                 'money' => $value->money,
                 'grade' => $value->grade,
                 'remarks' => $value->remarks,
-                'created_at' => $value->created_at,
-                'updated_at' => $value->updated_at,
+                'created_at' => $crtdt,
+                'updated_at' => $udtdt,
             ]);
         }
         return $dataArr;
