@@ -196,6 +196,7 @@ class RecordController extends Controller
             $crtdt = $value->created_at->toDateTimeString();
             $udtdt = $value->updated_at->toDateTimeString();
             array_push($dataArr, [
+                'id' => $value->id,
                 'star' => $value->star,
                 'money' => $value->money,
                 'grade' => $value->grade,
