@@ -25,10 +25,10 @@ class RecordController extends Controller
         $this->middleware('auth:api');
      }
      
-     public function userList()
+     public function userList(Request $request)
      {
         $usersData = User::get();
-        $returnedList =$this->synArr($usersData);
+        $returnedList =$this->synArr($usersData, $request);
         // 排序（SORT_DESC=>降序、SORT_ASC=>升序）
         $newArr = [];
         foreach ($returnedList as $key => $value) {
@@ -69,7 +69,6 @@ class RecordController extends Controller
     {
         $rules = [
             'star' => ['required', 'string'],
-            // 'money' => ['required'],
             'grade' => ['required', 'string'],
         ];
         request()->offsetSet('money', Star::where('star', $request->get('star'))->first()->money*3);
@@ -159,7 +158,9 @@ class RecordController extends Controller
             $this->statusCode = 400;
         } else {
             if (!$judge) {
-                $lastTime = SignRecord::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->get()[0]->created_at->toDateTimeString();
+                $lastTime = SignRecord::where('user_id', Auth::user()->id)
+                                        ->orderBy('id', 'desc')->get()[0]
+                                        ->created_at->toDateTimeString();
                 $interval = (new Carbon)->diffInHours($lastTime, true);
                 if ($interval > 3)
                 {
@@ -220,13 +221,18 @@ class RecordController extends Controller
         return $dataArr;
     }
 
-    private function synArr($usersData)
+    private function synArr($usersData, $request)
     {
         $dataArr = [];
         foreach ($usersData as $key => $value) {
             $userId = $value->id;
             $userName = $value->name;
-            $sinrecData = $value->sinRec;
+            if (($begin = $request->stime) && ($end = $request->etime)) {
+                $end = Carbon::parse($request->end)->addDays(1)->toDateString();
+                $sinrecData = $value->sinRec()->whereBetween('created_at', [$begin, $end])->get();
+            } else {
+                $sinrecData = $value->sinRec;
+            }
             $userMoney = 0;
             foreach ($sinrecData as $k => $v) {
                 $userMoney += $v->money;
