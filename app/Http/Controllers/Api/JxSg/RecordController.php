@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\JxSg;
 
 use App\User;
+use Carbon\Carbon;
 use App\Models\Jx\Star;
 use Illuminate\Http\Request;
 use App\Models\Jx\SignRecord;
@@ -71,7 +72,7 @@ class RecordController extends Controller
             // 'money' => ['required'],
             'grade' => ['required', 'string'],
         ];
-        request()->offsetSet('money', Star::where('star', $request->get('star'))->first()->money);
+        request()->offsetSet('money', Star::where('star', $request->get('star'))->first()->money*3);
         request()->offsetSet('user_id', Auth::user()->id);
         $validator = Validator::make($request->all(), $rules);
         $this->unio($request, $validator, '打卡成功', '打卡失败, 请稍后重试');
@@ -89,6 +90,13 @@ class RecordController extends Controller
         $this->unio($request, $validator, '更新备注成功', '更新备注失败, 请稍后重试', true);
 
         return response()->json($this->returned, $this->statusCode);
+    }
+
+    public function searchPer(Request $request)
+    {
+        request()->offsetSet('userid', Auth::user()->id);
+        $ret = $this->statistics($request);
+        return $ret;
     }
 
     // /{id}/{begin}/{end}  /1/2020-10-02/2020-10-03
@@ -111,7 +119,7 @@ class RecordController extends Controller
         } else {
             $id = $request->userid;
             $begin = $request->stime;
-            $end = $request->etime;
+            $end = Carbon::parse($request->etime)->addDays(1)->toDateString();
             if (is_null([$id, $begin, $end])) {
                 $this->returned['result']['msg'] = '请指定用户与闭合时间段';
             } else {

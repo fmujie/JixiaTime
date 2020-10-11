@@ -34,6 +34,7 @@ $api->version('v1', [
     $api->group(['middleware' => ['api', 'auth']], function ($api) {
         $api->post('/sigrec', 'JxSg\RecordController@record');
         $api->patch('/uprec', 'JxSg\RecordController@updateRec');
+        $api->get('/searchper', 'JxSg\RecordController@searchPer');
         $api->get('/statistic', 'JxSg\RecordController@statistics')->middleware('role:Administer');
         $api->get('/admin/userlist', 'JxSg\RecordController@userList')->middleware('role:Administer');
         $api->delete('/admin/user/delete/{id}', 'JxSg\RecordController@delete')->middleware('role:Administer');
